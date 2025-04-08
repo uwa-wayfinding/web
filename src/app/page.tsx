@@ -1,103 +1,248 @@
-import Image from "next/image";
+// Mark as a Client Component
+'use client';
 
-export default function Home() {
+import React, { useState, useCallback, useRef, DragEvent, ChangeEvent } from 'react';
+// Import the CSS Module
+import styles from './UploadForm.module.css';
+
+export default function UploadPage() {
+  // --- State Variables ---
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [statusType, setStatusType] = useState<'success' | 'error' | ''>('');
+  const [fileId, setFileId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  // --- Refs ---
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- Helper Functions ---
+  const resetState = () => {
+    setSelectedFile(null);
+    setIsDragOver(false);
+    setUploadStatus('');
+    setStatusType('');
+    setFileId(null);
+    setIsUploading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const validateFile = (file: File): boolean => {
+    if (!file) {
+      setUploadStatus('No file selected.');
+      setStatusType('error');
+      return false;
+    }
+    // Strict check for .dwg extension
+    const fileNameLower = file.name.toLowerCase();
+    if (!fileNameLower.endsWith('.dwg')) {
+      setUploadStatus('Invalid file type. Please select a .dwg file.');
+      setStatusType('error');
+      return false;
+    }
+    return true;
+  };
+
+  // --- Event Handlers ---
+  const handleFileSelected = useCallback((file: File | null) => {
+    resetState();
+    if (file && validateFile(file)) {
+      setSelectedFile(file);
+      setUploadStatus(''); // Clear previous error if valid
+      setStatusType('');
+    } else if (file) { // File exists but validation failed
+      setSelectedFile(null);
+    }
+  }, []);
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    handleFileSelected(event.target.files ? event.target.files[0] : null);
+  };
+
+  const handleZoneClick = () => {
+    // Clicking the label already triggers the input via htmlFor
+    // So, no explicit fileInputRef.current?.click(); needed here
+  };
+
+  const handleDragOver = useCallback((event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    const file = event.dataTransfer.files ? event.dataTransfer.files[0] : null;
+    handleFileSelected(file);
+  }, [handleFileSelected]);
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setUploadStatus('Please select a .dwg file first.');
+      setStatusType('error');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadStatus('Uploading...');
+    setStatusType('');
+    setFileId(null);
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    const backendUploadURL = '/api/upload'; // <<< REPLACE WITH YOUR ACTUAL API ENDPOINT
+
+    try {
+      const response = await fetch(backendUploadURL, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let errorMsg = `Upload failed: ${response.statusText} (${response.status})`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.message || errorMsg;
+        } catch (e) { /* Response might not be JSON */ }
+        throw new Error(errorMsg);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.fileId) {
+        setUploadStatus(result.message || 'Upload successful!');
+        setStatusType('success');
+        setFileId(result.fileId);
+        setSelectedFile(null); // Clear selection after success
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } else {
+        throw new Error(result.message || 'Upload failed: Invalid server response.');
+      }
+
+    } catch (error: any) {
+      console.error("Upload Error:", error);
+      setUploadStatus(`Upload failed: ${error.message}`);
+      setStatusType('error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // --- Dynamic Class Names ---
+  const dropZoneClasses = [
+    styles.dropZone,
+    isDragOver ? styles.isDragover : '',
+    selectedFile ? styles.isFileSelected : '',
+    statusType === 'error' ? styles.isError : '',
+  ].filter(Boolean).join(' ');
+
+  // --- JSX ---
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className={styles.pageWrapper}>
+      {/* Header Section */}
+      <header className={styles.pageHeader}>
+        {/* Optional Logo: <img src="/logo.png" alt="Logo" className={styles.logo} /> */}
+        <span className={styles.projectName}>UWA Wayfinding - File Upload</span>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      {/* Main Content Area */}
+      <main className={styles.mainContent}>
+        {/* Introductory Text */}
+        <p className={styles.introText}>
+          Please upload your .dwg format wayfinding data file. The system will process it and return a file ID. Only <strong>.dwg</strong> files are accepted.
+        </p>
+
+        {/* Upload Component Container */}
+        <div className={styles.uploadContainer}>
+          <h2>Upload .dwg File</h2>
+
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            id="file-input" // ID for the label's htmlFor
+            ref={fileInputRef}
+            accept=".dwg" // Browser hint
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+            disabled={isUploading} // Disable input while uploading
+          />
+
+          {/* Drop Zone Label */}
+          <label
+            htmlFor="file-input" // Links label to the hidden input
+            className={dropZoneClasses}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            // onClick is implicitly handled by htmlFor
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div className={styles.dropZone__content}>
+              {/* Icon */}
+              <svg className={styles.dropZone__icon} viewBox="0 0 24 24" fill="currentColor">
+                 <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+              </svg>
+
+              {/* Show filename or prompt */}
+              {selectedFile ? (
+                <div className={styles.dropZone__fileInfo}>
+                  Selected file: <span className={styles.fileName}>{selectedFile.name}</span>
+                </div>
+              ) : (
+                <p className={styles.dropZone__prompt}>
+                  Drag & drop your .dwg file here, or click to select
+                </p>
+              )}
+            </div>
+          </label>
+
+          {/* Progress/Uploading Indicator (Simplified) */}
+          {isUploading && (
+            <div className={styles.progressBarContainer}>
+              <div className={styles.progressBar} style={{animation: 'pulse 1.5s infinite ease-in-out'}}>Uploading...</div>
+            </div>
+          )}
+
+          {/* Upload Button */}
+          <button
+            onClick={handleUpload}
+            disabled={!selectedFile || isUploading}
+            className={styles.uploadButton}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+            {isUploading ? 'Uploading...' : 'Upload File'}
+          </button>
+
+          {/* Status Message Area */}
+          {uploadStatus && (
+            <div id="upload-status" className={`${styles.uploadStatus} ${statusType === 'success' ? styles.isSuccess : ''} ${statusType === 'error' ? styles.isError : ''}`}>
+              {uploadStatus}
+              {/* Display File ID on success */}
+              {statusType === 'success' && fileId && (
+                <span> File ID: {fileId}</span>
+              )}
+            </div>
+          )}
+
+          {/* Reset Button appears after completion (success or error) */}
+          {(statusType === 'success' || statusType === 'error') && !isUploading && (
+              <button onClick={resetState} className={styles.resetButton}>Upload Another File</button>
+           )}
+
+        </div> {/* End uploadContainer */}
+      </main> {/* End mainContent */}
+
+      {/* Footer Section */}
+      <footer className={styles.pageFooter}>
+        © {new Date().getFullYear()} UWA Wayfinding Project. All rights reserved.
       </footer>
-    </div>
+    </div> // End pageWrapper
   );
 }
