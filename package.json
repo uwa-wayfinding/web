@@ -12,9 +12,12 @@
 		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
 	},
 	"dependencies": {
-		"next": "15.2.4",
+		"next": "15.3.1-canary.0",
 		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"react-dom": "^19.0.0",
+		"@mui/material": "^7.0.2",
+		"ky": "^1.8.0",
+		"mui": "^0.0.1"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250403.0",
