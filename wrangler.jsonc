@@ -16,6 +16,17 @@
 	},
 	"observability": {
 		"enabled": true
+	},
+	"r2_buckets": [
+		{
+			"binding": "R2",
+			"bucket_name": "uwa-wayfinding",
+			"preview_bucket_name": "uwa-wayfinding"
+		}
+	],
+	"vars": {
+		"R2_ENDPOINT": "https://32bfc52edf1937693009448f3a102db8.r2.cloudflarestorage.com",
+		"R2_PUBLIC_URL": "https://pub-8d29e550a8894f6db459c5af871b7a4e.r2.dev"
 	}
 	/**
 	 * Smart Placement
