@@ -19,9 +19,9 @@
 	},
 	"r2_buckets": [
 		{
-			"binding": "BUCKET",
-			"bucket_name": "dwg-file-transformer",
-			"preview_bucket_name": "dwg-file-transformer"
+			"binding": "R2",
+			"bucket_name": "uwa-wayfinding",
+			"preview_bucket_name": "uwa-wayfinding"
 		}
 	],
 	"vars": {

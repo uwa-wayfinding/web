@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { Box, Paper, TextField, Button, Typography, Alert } from '@mui/material';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 export default function DownloadPage() {
   const [fileId, setFileId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const R2 = getCloudflareContext().env.R2
 
   const handleDownload = async () => {
     if (!fileId) {
@@ -18,28 +21,13 @@ export default function DownloadPage() {
     setError(null);
 
     try {
-      const fileUrl = `https://pub-8d29e550a8894f6db459c5af871b7a4e.r2.dev/${fileId}`; // using either '241-01.dwg' or '241-GN.DWG' for test
-      const response = await fetch(fileUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/octet-stream',
-          'Origin': window.location.origin,
-        },
-        mode: 'cors',
-      });
+      const object = await R2.get(fileId);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Download failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries()),
-          error: errorText
-        });
-        throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
+      if (!object) {
+        throw new Error('File not found');
       }
 
-      const blob = await response.blob();
+      const blob = await object.blob();
       
       if (blob.size === 0) {
         throw new Error('Downloaded file is empty');
