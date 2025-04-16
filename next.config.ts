@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'export', // ✅ required for open-next
+  // appDir: true,     // ✅ required if you're using App Router (app folder)
+  // experimental: {
+  //   typedRoutes: true
+  // }
 };
 
 export default nextConfig;
 
-// added by create cloudflare to enable calling `getCloudflareContext()` in `next dev`
+// 👇 This is only for `next dev`, keep it
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 initOpenNextCloudflareForDev();
