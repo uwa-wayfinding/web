@@ -1,103 +1,212 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import MapComponent from '@/components/Map';
+import Sidebar from '@/components/Sidebar';
+import { IMDFData } from '@/types/imdf';
+
+// UWA POIs with building and level information
+const uwaPOIs = [
+  {
+    id: 'aed1',
+    name: 'AED - Reid Library',
+    coordinates: [115.8167, -31.9805] as [number, number],
+    description: 'Located near the main entrance',
+    category: 'aed',
+    building: 'Reid Library',
+    level: '0'
+  },
+  {
+    id: 'aed2',
+    name: 'AED - Science Library',
+    coordinates: [115.8187, -31.9815] as [number, number],
+    description: 'Ground floor, near reception',
+    category: 'aed',
+    building: 'Science Library',
+    level: '0'
+  },
+  {
+    id: 'toilet1',
+    name: 'Toilets - Reid Library',
+    coordinates: [115.8165, -31.9803] as [number, number],
+    description: 'Ground floor, near the main entrance',
+    category: 'toilet',
+    building: 'Reid Library',
+    level: '0'
+  },
+  {
+    id: 'toilet2',
+    name: 'Toilets - Science Library',
+    coordinates: [115.8185, -31.9813] as [number, number],
+    description: 'Ground floor, near the study area',
+    category: 'toilet',
+    building: 'Science Library',
+    level: '0'
+  },
+  {
+    id: 'bench1',
+    name: 'Bench - Oak Lawn',
+    coordinates: [115.8170, -31.9800] as [number, number],
+    description: 'Under the oak tree',
+    category: 'bench'
+  },
+  {
+    id: 'bench2',
+    name: 'Bench - Sunken Garden',
+    coordinates: [115.8150, -31.9790] as [number, number],
+    description: 'Near the fountain',
+    category: 'bench'
+  },
+  {
+    id: 'cafe1',
+    name: 'Café - Reid Library',
+    coordinates: [115.8168, -31.9804] as [number, number],
+    description: 'Ground floor, serves coffee and snacks',
+    category: 'cafe'
+  },
+  {
+    id: 'library1',
+    name: 'Reid Library',
+    coordinates: [115.8167, -31.9805] as [number, number],
+    description: 'Main library with study spaces and resources',
+    category: 'library'
+  },
+  {
+    id: 'library2',
+    name: 'Science Library',
+    coordinates: [115.8187, -31.9815] as [number, number],
+    description: 'Specialized science and engineering resources',
+    category: 'library'
+  },
+  {
+    id: 'parking1',
+    name: 'Parking - Reid Library',
+    coordinates: [115.8157, -31.9807] as [number, number],
+    description: 'Multi-level parking facility',
+    category: 'parking'
+  }
+];
+
+// Sample IMDF data (you'll need to replace this with actual IMDF data)
+const sampleIMDFData: IMDFData = {
+  buildings: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [115.8160, -31.9800],
+            [115.8170, -31.9800],
+            [115.8170, -31.9810],
+            [115.8160, -31.9810],
+            [115.8160, -31.9800]
+          ]]
+        },
+        properties: {
+          name: 'Reid Library'
+        }
+      }
+    ]
+  },
+  units: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [115.8162, -31.9802],
+            [115.8168, -31.9802],
+            [115.8168, -31.9808],
+            [115.8162, -31.9808],
+            [115.8162, -31.9802]
+          ]]
+        },
+        properties: {
+          name: 'Main Hall',
+          level: '0'
+        }
+      }
+    ]
+  },
+  openings: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [115.8165, -31.9802],
+            [115.8165, -31.9800]
+          ]
+        },
+        properties: {
+          level: '0'
+        }
+      }
+    ]
+  },
+  levels: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [115.8160, -31.9800],
+            [115.8170, -31.9800],
+            [115.8170, -31.9810],
+            [115.8160, -31.9810],
+            [115.8160, -31.9800]
+          ]]
+        },
+        properties: {
+          level: '0',
+          name: 'Ground Floor'
+        }
+      }
+    ]
+  }
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentLevel, setCurrentLevel] = useState<string>('0');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <main className="min-h-screen">
+      <div className="flex h-screen">
+        <div className="flex flex-col">
+          <Sidebar 
+            selectedCategory={selectedCategory}
+            onCategorySelect={setSelectedCategory}
+          />
+          <div className="p-4 bg-white border-t">
+            <h3 className="font-bold mb-2">Select Level</h3>
+            <select 
+              value={currentLevel}
+              onChange={(e) => setCurrentLevel(e.target.value)}
+              className="w-full p-2 border rounded"
+            >
+              <option value="0">Ground Floor</option>
+              <option value="1">Level 1</option>
+              <option value="2">Level 2</option>
+            </select>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <div className="flex-1 h-full">
+          <MapComponent 
+            pois={uwaPOIs}
+            selectedCategory={selectedCategory}
+            imdfData={sampleIMDFData}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        </div>
+      </div>
+    </main>
   );
 }
