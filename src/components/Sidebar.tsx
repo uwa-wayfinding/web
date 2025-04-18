@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ThemeToggle } from './ThemeToggle';
 
 interface POICategory {
   id: string;
@@ -24,7 +25,7 @@ const categories: POICategory[] = [
 
 export default function Sidebar({ onCategorySelect, selectedCategory }: SidebarProps) {
   return (
-    <div className="w-64 bg-white h-full p-4 shadow-lg">
+    <div className="w-64 bg-primay text-primay-foreground h-full p-4 shadow-lg">
       <h2 className="text-xl font-bold mb-4">UWA Facilities</h2>
       <div className="space-y-2">
         {categories.map((category) => (
@@ -34,14 +35,17 @@ export default function Sidebar({ onCategorySelect, selectedCategory }: SidebarP
             onClick={() => onCategorySelect(category.id)}
             className={`w-full p-3 rounded-lg flex items-center gap-2 transition-colors ${
               selectedCategory === category.id
-                ? 'bg-blue-100 text-blue-700'
-                : 'hover:bg-gray-100'
+                ? 'bg-primary/10 text-primary'
+                : 'hover:bg-primary/5'
             }`}
           >
             <span className="text-xl">{category.icon}</span>
             <span>{category.name}</span>
-          </button>
+          </button> 
         ))}
+      </div>
+      <div>
+        <ThemeToggle />
       </div>
     </div>
   );

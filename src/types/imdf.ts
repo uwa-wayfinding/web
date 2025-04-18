@@ -2,7 +2,7 @@ export interface IMDFFeature {
   type: 'Feature';
   geometry: {
     type: string;
-    coordinates: number[][][] | number[][][][];
+    coordinates: number[][] | number[][][];
   };
   properties: {
     level?: string;

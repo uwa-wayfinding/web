@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import MapComponent from '@/components/Map';
 import Sidebar from '@/components/Sidebar';
-import { IMDFData } from '@/types/imdf';
+import type { IMDFData } from '@/types/imdf';
 
 // UWA POIs with building and level information
 const uwaPOIs = [
@@ -186,12 +186,12 @@ export default function Home() {
             selectedCategory={selectedCategory}
             onCategorySelect={setSelectedCategory}
           />
-          <div className="p-4 bg-white border-t">
+          <div className="p-4 bg-primary text-primary-foreground border-t border-border">
             <h3 className="font-bold mb-2">Select Level</h3>
             <select 
               value={currentLevel}
               onChange={(e) => setCurrentLevel(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border border-border rounded bg-primary text-secondary-foreground"
             >
               <option value="0">Ground Floor</option>
               <option value="1">Level 1</option>
