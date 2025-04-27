@@ -3,10 +3,9 @@ import { db } from '@/lib/db'
 import { getUser } from '@/lib/auth-server'
 import { isNullish } from 'remeda'
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request) {
+  const { id } = await request.json()
+
   try {
     const user = await getUser()
     if (isNullish(user)) {
@@ -14,7 +13,7 @@ export async function POST(
     }
 
     const file = await db.file.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (isNullish(file)) {
@@ -41,7 +40,7 @@ export async function POST(
       }),
       // Set the selected file to public
       db.file.update({
-        where: { id: params.id },
+        where: { id },
         data: { isPublic: true },
       }),
     ])
