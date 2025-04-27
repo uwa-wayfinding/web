@@ -19,9 +19,5 @@ export const auth = betterAuth({
       clientId: serverEnv.GOOGLE_CLIENT_ID,
       clientSecret: serverEnv.GOOGLE_CLIENT_SECRET,
     },
-    github: {
-      clientId: 'Ov23liRxvNalV0BQJwSH',
-      clientSecret: '9e411d549a57b715659d63b55f29bb3a250cf6f7'
-    }
   },
 });
