@@ -1,59 +1,25 @@
 'use client';
 
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { Provider as JotaiProvider } from 'jotai';
+import { useAtom } from 'jotai';
+import { getThemeAtom } from '@/lib/theme';
 
-type ThemeContextType = {
-  mode: 'light' | 'dark';
-  toggleTheme: () => void;
-};
-
-const ThemeContext = createContext<ThemeContextType>({
-  mode: 'light',
-  toggleTheme: () => {},
-});
-
-export function useTheme() {
-  return useContext(ThemeContext);
+function ThemeWrapper({ children }: { children: React.ReactNode }) {
+  const [theme] = useAtom(getThemeAtom);
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  );
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem('theme') as 'light' | 'dark';
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setMode(savedMode || (prefersDark ? 'dark' : 'light'));
-  }, []);
-
-  const toggleTheme = () => {
-    const newMode = mode === 'light' ? 'dark' : 'light';
-    setMode(newMode);
-    localStorage.setItem('theme', newMode);
-  };
-
-  const theme = createTheme({
-    palette: {
-      mode,
-    },
-    components: {
-      MuiCssBaseline: {
-        styleOverrides: {
-          body: {
-            backgroundColor: mode === 'light' ? '#ffffff' : '#0a0a0a',
-          },
-        },
-      },
-    },
-  });
-
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme }}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-    </ThemeContext.Provider>
+    <JotaiProvider>
+      <ThemeWrapper>{children}</ThemeWrapper>
+    </JotaiProvider>
   );
 } 
