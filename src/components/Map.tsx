@@ -42,7 +42,7 @@ export default function MapComponent({
   const [lng] = useState(initialCenter[0]);
   const [lat] = useState(initialCenter[1]);
   const [zoom] = useState(initialZoom);
-  const [currentLevel, setCurrentLevel] = useState<string>('0'); // Default to ground level
+  const [currentLevel] = useState<string>('0'); // Default to ground level
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -79,7 +79,7 @@ export default function MapComponent({
     // Add building outlines
     map.addSource('buildings', {
       type: 'geojson',
-      data: imdfData.buildings
+      data: imdfData.buildings as GeoJSON.FeatureCollection
     });
 
     map.addLayer({
@@ -95,7 +95,7 @@ export default function MapComponent({
     // Add unit outlines (rooms, etc.)
     map.addSource('units', {
       type: 'geojson',
-      data: imdfData.units
+      data: imdfData.units as GeoJSON.FeatureCollection
     });
 
     map.addLayer({
@@ -124,7 +124,7 @@ export default function MapComponent({
     // Add openings (doors, etc.)
     map.addSource('openings', {
       type: 'geojson',
-      data: imdfData.openings
+      data: imdfData.openings as GeoJSON.FeatureCollection
     });
 
     map.addLayer({

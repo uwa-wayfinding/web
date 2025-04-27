@@ -8,7 +8,7 @@ export interface IMDFFeature {
     level?: string;
     name?: string;
     category?: string;
-    [key: string]: any;
+    [key: string]: string | number | string[] | number[] | undefined;
   };
 }
 
