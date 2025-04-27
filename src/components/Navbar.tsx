@@ -3,12 +3,10 @@
 import { AppBar, Toolbar, Button, Typography, Box } from "@mui/material"
 import Link from "next/link"
 import { authClient, useSession } from "@/lib/auth-client"
-import { useRouter } from "next/navigation"
 import { ThemeToggle } from "./ThemeToggle"
 
 export default function Navbar() {
   const { data: session } = useSession()
-  const router = useRouter()
 
   return (
     <AppBar position="static">

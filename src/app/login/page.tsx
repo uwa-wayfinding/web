@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button, Box, CircularProgress } from "@mui/material"
+import { Button, Box } from "@mui/material"
 import { authClient } from "@/lib/auth-client"
 import { isNullish } from "remeda"
 
