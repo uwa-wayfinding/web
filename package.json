@@ -10,6 +10,9 @@
 		"postinstall": "prisma generate"
 	},
 	"dependencies": {
+		"@auth/prisma-adapter": "^2.9.0",
+		"@aws-sdk/client-s3": "^3.797.0",
+		"@aws-sdk/s3-request-presigner": "^3.797.0",
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.0",
 		"@mui/icons-material": "^7.0.2",
@@ -20,10 +23,9 @@
 		"jotai": "^2.12.3",
 		"ky": "^1.8.0",
 		"mapbox-gl": "^3.11.0",
-		"mui": "^0.0.1",
-		"next": "15.3.0",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0",
+		"next": "15.3.1",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
 		"remeda": "^2.21.3",
 		"zod": "^3.24.3"
 	},
@@ -39,6 +41,7 @@
 		"eslint-config-next": "15.2.4",
 		"prisma": "^6.6.0",
 		"tailwindcss": "^4",
-		"typescript": "^5"
+		"typescript": "^5",
+		"vercel": "^41.6.2"
 	}
 }
