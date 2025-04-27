@@ -4,40 +4,25 @@ import { useState } from 'react';
 import {
   Container,
   Typography,
-  Button,
   Box,
-  TextField,
   Alert,
 } from '@mui/material';
 import FileList from '@/components/FileList';
+import FileUpload from '@/components/FileUpload';
 
 export default function Home() {
-  const [originalUrl, setOriginalUrl] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleUpload = async () => {
-    try {
-      const response = await fetch('/api/files/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ originalUrl }),
-      });
+  const handleUploadSuccess = (fileId: string) => {
+    setSuccess('File uploaded successfully!');
+    console.log(`File uploaded successfully! ${fileId}`);
+    setError('');
+  };
 
-      if (!response.ok) {
-        throw new Error('Failed to upload file');
-      }
-
-      setOriginalUrl('');
-      setSuccess('File uploaded successfully!');
-      setError('');
-    } catch (error) {
-      console.error(error);
-      setError('Failed to upload file. Please try again.');
-      setSuccess('');
-    }
+  const handleUploadError = (errorMessage: string) => {
+    setError(errorMessage);
+    setSuccess('');
   };
 
   return (
@@ -50,22 +35,10 @@ export default function Home() {
         <Typography variant="h6" gutterBottom>
           Upload New File
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <TextField
-            fullWidth
-            label="File URL"
-            value={originalUrl}
-            onChange={(e) => setOriginalUrl(e.target.value)}
-            placeholder="Enter the URL of the file to upload"
-          />
-          <Button
-            variant="contained"
-            onClick={handleUpload}
-            disabled={!originalUrl}
-          >
-            Upload
-          </Button>
-        </Box>
+        <FileUpload 
+          onUploadSuccess={handleUploadSuccess}
+          onUploadError={handleUploadError}
+        />
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
       </Box>
