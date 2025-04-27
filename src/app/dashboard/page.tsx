@@ -16,6 +16,7 @@ export default function Home() {
 
   const handleUploadSuccess = (fileId: string) => {
     setSuccess('File uploaded successfully!');
+    console.log(`File uploaded successfully! ${fileId}`);
     setError('');
   };
 

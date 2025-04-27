@@ -109,6 +109,7 @@ export default function FileUpload({ onUploadSuccess, onUploadError }: FileUploa
           const errorData = await response.json();
           errorMsg = errorData.message || errorMsg;
         } catch (e) {
+          console.error('Upload Error:', e);
           // Response might not be JSON
         }
         throw new Error(errorMsg);
