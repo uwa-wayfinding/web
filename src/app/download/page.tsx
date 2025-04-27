@@ -2,14 +2,12 @@
 
 import { useState } from 'react';
 import { Box, Paper, TextField, Button, Typography, Alert } from '@mui/material';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 export default function DownloadPage() {
   const [fileId, setFileId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const R2 = getCloudflareContext().env.R2
 
   const handleDownload = async () => {
     if (!fileId) {
@@ -20,34 +18,35 @@ export default function DownloadPage() {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const object = await R2.get(fileId);
+    // try {
+      setError('File not found');
+    //   const object = await R2.get(fileId);
       
-      if (!object) {
-        throw new Error('File not found');
-      }
+    //   if (!object) {
+    //     throw new Error('File not found');
+    //   }
 
-      const blob = await object.blob();
+    //   const blob = await object.blob();
       
-      if (blob.size === 0) {
-        throw new Error('Downloaded file is empty');
-      }
+    //   if (blob.size === 0) {
+    //     throw new Error('Downloaded file is empty');
+    //   }
       
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileId;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error('Download error:', err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+    //   // Create a download link
+    //   const url = window.URL.createObjectURL(blob);
+    //   const a = document.createElement('a');
+    //   a.href = url;
+    //   a.download = fileId;
+    //   document.body.appendChild(a);
+    //   a.click();
+    //   window.URL.revokeObjectURL(url);
+    //   document.body.removeChild(a);
+    // } catch (err) {
+    //   console.error('Download error:', err);
+    //   setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   return (
