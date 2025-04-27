@@ -90,43 +90,60 @@ export default function FileUpload({ onUploadSuccess, onUploadError }: FileUploa
     }
 
     setIsUploading(true);
-    setUploadStatus('Uploading...');
+    setUploadStatus('Preparing upload...');
     setStatusType('');
-    setFileId(null);
-
-    const formData = new FormData();
-    formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('/api/upload', {
+      // Step 1: Get presigned URL
+      const formData = new FormData();
+      formData.append('fileName', selectedFile.name);
+      formData.append('fileType', selectedFile.type);
+
+      const response = await fetch('/api/files/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        let errorMsg = `Upload failed: ${response.statusText} (${response.status})`;
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.message || errorMsg;
-        } catch (e) {
-          console.error('Upload Error:', e);
-          // Response might not be JSON
-        }
-        throw new Error(errorMsg);
+        throw new Error('Failed to get upload URL');
       }
 
-      const result = await response.json();
+      const { file: dbFile, presignedUrl } = await response.json();
+      setFileId(dbFile.id);
 
-      if (result.success && result.fileId) {
-        setUploadStatus(result.message || 'Upload successful!');
-        setStatusType('success');
-        setFileId(result.fileId);
-        setSelectedFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        onUploadSuccess?.(result.fileId);
-      } else {
-        throw new Error(result.message || 'Upload failed: Invalid server response.');
+      // Step 2: Upload to R2 using presigned URL
+      setUploadStatus('Uploading to storage...');
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: selectedFile,
+        headers: {
+          'Content-Type': selectedFile.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
       }
+
+      // Step 3: Update file status
+      const statusFormData = new FormData();
+      statusFormData.append('fileId', dbFile.id);
+      statusFormData.append('status', 'COMPLETED');
+
+      const statusResponse = await fetch('/api/files/upload', {
+        method: 'POST',
+        body: statusFormData,
+      });
+
+      if (!statusResponse.ok) {
+        throw new Error('Failed to update file status');
+      }
+
+      setUploadStatus('Upload successful!');
+      setStatusType('success');
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      onUploadSuccess?.(dbFile.id);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       console.error('Upload Error:', error);
