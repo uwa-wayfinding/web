@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import type { FileListRef } from '@/components/FileList';
 import {
   Container,
   Typography,
@@ -13,11 +14,13 @@ import FileUpload from '@/components/FileUpload';
 export default function Home() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const fileListRef = useRef<FileListRef>(null);
 
   const handleUploadSuccess = (fileId: string) => {
     setSuccess('File uploaded successfully!');
     console.log(`File uploaded successfully! ${fileId}`);
     setError('');
+    fileListRef.current?.refresh();
   };
 
   const handleUploadError = (errorMessage: string) => {
@@ -46,7 +49,7 @@ export default function Home() {
       <Typography variant="h6" gutterBottom>
         Your Files
       </Typography>
-      <FileList />
+      <FileList ref={fileListRef} />
     </Container>
   );
 }
