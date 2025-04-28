@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from 'react';
 import styles from './UploadForm.module.css';
 import ky from 'ky';
-import { FileStatus } from '@/prisma/index';
 
 interface FileUploadProps {
   onUploadSuccess?: (fileId: string) => void;
