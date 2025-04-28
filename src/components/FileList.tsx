@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
 import {
   List,
   ListItem,
@@ -12,15 +12,18 @@ import {
 } from '@mui/material'
 import type { File } from '@/types/file'
 
-export default function FileList() {
+export interface FileListRef {
+  refresh: () => void
+}
+
+const FileList = forwardRef<FileListRef>(function FileList(_, ref) {
   const [files, setFiles] = useState<File[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchFiles()
-  }, [])
-
-  const fetchFiles = async () => {
+  const fetchFiles = useCallback(async () => {
+    setLoading(true)
+    setError(null)
     try {
       const response = await fetch('/api/files')
       if (!response.ok) throw new Error('Failed to fetch files')
@@ -28,10 +31,19 @@ export default function FileList() {
       setFiles(data)
     } catch (error) {
       console.error('Error fetching files:', error)
+      setError('Failed to load files')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchFiles()
+  }, [fetchFiles])
+
+  useImperativeHandle(ref, () => ({
+    refresh: fetchFiles,
+  }))
 
   const handleSetPublic = async (fileId: string) => {
     try {
@@ -39,7 +51,7 @@ export default function FileList() {
         method: 'POST',
       })
       if (!response.ok) throw new Error('Failed to set file as public')
-      await fetchFiles() // Refresh the list
+      await fetchFiles()
     } catch (error) {
       console.error('Error setting file as public:', error)
     }
@@ -63,6 +75,10 @@ export default function FileList() {
     return <Typography>Loading...</Typography>
   }
 
+  if (error) {
+    return <Typography color="error">{error}</Typography>
+  }
+
   return (
     <List>
       {files.map((file) => (
@@ -77,8 +93,8 @@ export default function FileList() {
           <ListItemText
             primary={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="subtitle1">
-                  {file.originalUrl.split('/').pop()}
+                <Typography variant="subtitle1" fontFamily="monospace">
+                  {file.id}
                 </Typography>
                 <Chip
                   label={file.status}
@@ -98,17 +114,20 @@ export default function FileList() {
               </Typography>
             }
           />
-          {file.status === 'SUCCESS' && !file.isPublic && (
+          { 
             <Button
               variant="contained"
               color="primary"
+              disabled={file.status !== 'SUCCESS' || file.isPublic}
               onClick={() => handleSetPublic(file.id)}
             >
               Set as Public
             </Button>
-          )}
+          }
         </ListItem>
       ))}
     </List>
   )
-} 
+})
+
+export default FileList

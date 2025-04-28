@@ -58,7 +58,6 @@
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Soften shadow slightly */
     text-align: center;
-    max-width: 500px; /* Max width */
     width: 100%; /* Full width within main content padding */
   }
   

@@ -14,6 +14,9 @@ export async function GET() {
 			where: {
 				userId: user.id,
 			},
+			orderBy: {
+				uploadedAt: "desc",
+			},
 		});
 
 		return NextResponse.json(files);

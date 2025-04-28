@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import styles from './UploadForm.module.css';
+import ky from 'ky';
 
 interface FileUploadProps {
   onUploadSuccess?: (fileId: string) => void;
@@ -95,49 +96,30 @@ export default function FileUpload({ onUploadSuccess, onUploadError }: FileUploa
 
     try {
       // Step 1: Get presigned URL
-      const formData = new FormData();
-      formData.append('fileName', selectedFile.name);
-      formData.append('fileType', selectedFile.type);
+      const { file: dbFile, presignedUrl } = await ky.post('/api/files/upload', {
+        json: {
+          fileName: selectedFile.name,
+          fileType: selectedFile.type,
+        },
+      }).json<{ file: { id: string }; presignedUrl: string }>();
 
-      const response = await fetch('/api/files/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get upload URL');
-      }
-
-      const { file: dbFile, presignedUrl } = await response.json();
       setFileId(dbFile.id);
 
       // Step 2: Upload to R2 using presigned URL
       setUploadStatus('Uploading to storage...');
-      const uploadResponse = await fetch(presignedUrl, {
-        method: 'PUT',
+      await ky.put(presignedUrl, {
         body: selectedFile,
         headers: {
           'Content-Type': selectedFile.type,
         },
       });
 
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file');
-      }
-
       // Step 3: Update file status
-      const statusFormData = new FormData();
-      statusFormData.append('fileId', dbFile.id);
-      statusFormData.append('status', 'COMPLETED');
-
-      const statusResponse = await fetch('/api/files/upload', {
-        method: 'POST',
-        body: statusFormData,
+      await ky.patch('/api/files/upload', {
+        json: {
+          fileId: dbFile.id
+        },
       });
-
-      if (!statusResponse.ok) {
-        throw new Error('Failed to update file status');
-      }
 
       setUploadStatus('Upload successful!');
       setStatusType('success');
@@ -186,7 +168,7 @@ export default function FileUpload({ onUploadSuccess, onUploadError }: FileUploa
       >
         <div className={styles.dropZone__content}>
           <svg className={styles.dropZone__icon} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" transform="translate(0, 0.5)"/>
           </svg>
 
           {selectedFile ? (

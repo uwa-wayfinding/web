@@ -29,7 +29,7 @@ export default function Navbar() {
               >
                 Logout
               </Button>
-              <Button color="inherit" component={Link} href="/profile">
+              <Button color="inherit" component={Link} href="/dashboard">
                 {session.user.name}
               </Button>
             </>
