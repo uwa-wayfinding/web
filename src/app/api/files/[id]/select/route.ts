@@ -15,6 +15,8 @@ export async function POST(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
+		user.email 
+
 		const file = await db.file.findUnique({
 			where: { id },
 		});
