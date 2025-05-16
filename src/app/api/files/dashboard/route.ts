@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { getUser } from "@/lib/auth-server";
 import { isNullish } from "remeda";
-// this page sends email back to the map uploader
+import { db } from '@/lib/db';
+// this page sends email to the UWAWayfinder admin
 export async function POST(req: NextRequest) {
   try {
 
-    // get user email
+    
     const user = await getUser();
-    let uploader_email=''
     if (isNullish(user)) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
-    uploader_email = user.email;
 
+    
     // email content
     const { to, subject, text } = await req.json();
     const transporter = nodemailer.createTransport({
@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: uploader_email,
-      subject: 'UWA Wayfinder File Upload Notification',
+      to: process.env.ADMIN_EMAIL,
+      subject: 'UWA Wayfiner, Thank you for your participation',
       html: text,
     };
     console.log('Sending email with options:', mailOptions);

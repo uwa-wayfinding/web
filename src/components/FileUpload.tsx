@@ -5,7 +5,7 @@ import styles from './UploadForm.module.css';
 import ky from 'ky';
 
 interface FileUploadProps {
-  onUploadSuccess?: (fileId: string) => void;
+  onUploadSuccess?: (fileId: string, fileName: string) => void;
   onUploadError?: (error: string) => void;
 }
 
@@ -125,7 +125,7 @@ export default function FileUpload({ onUploadSuccess, onUploadError }: FileUploa
       setStatusType('success');
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
-      onUploadSuccess?.(dbFile.id);
+      onUploadSuccess?.(dbFile.id, selectedFile.name);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       console.error('Upload Error:', error);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
+// this page sends to the UWAWayfinder admin
 const EmailForm: React.FC = () => {
   const cancel = () => {
     // Replace with your navigation logic, e.g., window.location.href or router.push
@@ -14,7 +14,7 @@ const EmailForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 构建 HTML 模板
+    // HTML template
     const emailHTML = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
         <h2 style="color: #007BFF; text-align: center;">New Map Update Request</h2>
