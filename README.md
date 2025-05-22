@@ -21,9 +21,9 @@ This is a minimal MVP web application that allows users to upload `.dwg` files a
 
 | Feature                 | Status     |
 |------------------------|------------|
-| Upload `.dwg` file     | ⏳ Planned (MVP) |
-| Store file in R2       | ⏳ Planned (MVP) |
-| Download API           | ⏳ Planned (MVP) |
-| DWG → IMDF Conversion  | ⏳ Planned |
-| IMDF Preview UI        | ⏳ Planned |
-| Auth & User Profiles   | ⏳ Planned |
+| Upload `.dwg` file     | Done       |
+| Store file in R2       | Done |
+| Download API           | Done |
+| DWG → IMDF Conversion  | Future Work |
+| IMDF Preview UI        | Future Work |
+| Auth & User Profiles   | Done |
